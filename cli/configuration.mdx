@@ -1,0 +1,90 @@
+---
+title: Configuration
+description: "Configure partio behavior with settings files and environment variables"
+---
+
+# Configuration
+
+## Config fields
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `enabled` | bool | `true` | Whether partio is active |
+| `strategy` | string | `"manual-commit"` | Capture strategy |
+| `agent` | string | `"claude-code"` | Name of the AI agent being tracked |
+| `log_level` | string | `"info"` | Log verbosity: `debug`, `info`, `warn`, `error` |
+| `strategy_options.push_sessions` | bool | `true` | Push checkpoint branch on `git push` |
+
+## Default settings.json
+
+Created by `partio enable`:
+
+```json
+{
+  "enabled": true,
+  "strategy": "manual-commit",
+  "agent": "claude-code",
+  "log_level": "info",
+  "strategy_options": {
+    "push_sessions": true
+  }
+}
+```
+
+## File locations
+
+partio loads configuration from multiple sources, merged in order (later sources override earlier ones):
+
+| Priority | Location | Description |
+|----------|----------|-------------|
+| 1 (lowest) | Built-in defaults | Hard-coded in the binary |
+| 2 | `~/.config/partio/settings.json` | Global/user-level config |
+| 3 | `<repo>/.partio/settings.json` | Repo-level config (committed) |
+| 4 | `<repo>/.partio/settings.local.json` | Repo-level local overrides (git-ignored) |
+| 5 (highest) | Environment variables | Runtime overrides |
+
+Only fields actually present in a config file override the accumulated config. Unknown fields are ignored.
+
+## Environment variables
+
+| Variable | Overrides | Accepts |
+|----------|-----------|---------|
+| `PARTIO_ENABLED` | `enabled` | `true`, `1` (case-insensitive) for enabled; anything else for disabled |
+| `PARTIO_STRATEGY` | `strategy` | Strategy name (e.g., `manual-commit`) |
+| `PARTIO_LOG_LEVEL` | `log_level` | `debug`, `info`, `warn`, `error` |
+
+## Examples
+
+### Disable auto-push of sessions
+
+If you don't want checkpoint data to be pushed automatically:
+
+```json title=".partio/settings.json"
+{
+  "strategy_options": {
+    "push_sessions": false
+  }
+}
+```
+
+### Enable debug logging for a single command
+
+```bash
+partio --log-level debug status
+```
+
+### Temporarily disable partio
+
+```bash
+PARTIO_ENABLED=false git commit -m "Skip partio for this commit"
+```
+
+### Per-machine overrides
+
+Use `.partio/settings.local.json` for settings that shouldn't be committed (this file is automatically git-ignored):
+
+```json title=".partio/settings.local.json"
+{
+  "log_level": "debug"
+}
+```

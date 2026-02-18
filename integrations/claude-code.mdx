@@ -1,0 +1,94 @@
+---
+title: Claude Code
+description: "How partio integrates with Claude Code"
+---
+
+# Claude Code Integration
+
+partio has first-class support for [Claude Code](https://docs.anthropic.com/en/docs/claude-code), Anthropic's AI coding assistant. When you use Claude Code in a partio-enabled repository, sessions are automatically captured alongside your commits.
+
+## Detection
+
+partio detects Claude Code by checking for a running Claude Code process. When the pre-commit hook fires, it:
+
+1. Checks if a Claude Code process is active on the system
+2. Locates the latest session file in the repository
+
+If both conditions are met, the session is marked as active and will be captured on commit.
+
+## What gets captured
+
+For each commit made while Claude Code is active, partio captures:
+
+| File | Contents |
+|------|----------|
+| `full.jsonl` | The complete JSONL transcript of the Claude Code session |
+| `context.md` | A summary of the session context |
+| `prompt.txt` | The initial prompt that started the session |
+| `metadata.json` | Session metadata (agent, token count, duration) |
+
+### Session metadata
+
+```json
+{
+  "agent": "claude-code",
+  "total_tokens": 14230,
+  "duration": "8m42.5s"
+}
+```
+
+## JSONL format
+
+The `full.jsonl` file contains the raw Claude Code session transcript. Each line is a JSON object representing one turn in the conversation. This is the same format used by Claude Code's internal session logging.
+
+## Attribution
+
+partio calculates what percentage of the commit diff was produced by the AI agent. This is added as a Git trailer:
+
+```
+Partio-Attribution: 87% agent
+```
+
+When calculation fails (e.g., no diff available), it defaults to `100%` attribution if an agent was active.
+
+## Commit trailers
+
+After each checkpoint, your commit message is amended with:
+
+```
+Your commit message here
+
+Partio-Checkpoint: a3f8c2d14e9b
+Partio-Attribution: 87% agent
+```
+
+## Troubleshooting
+
+### Checkpoints not being created
+
+1. **Run `partio doctor`** to check installation health
+2. **Verify Claude Code is running** when you commit — partio only captures when it detects an active process
+3. **Check log output** with `partio --log-level debug status`
+4. **Verify hooks are installed** — look for `# Installed by partio` in `.git/hooks/post-commit`
+
+### Session file not found
+
+Claude Code stores session files in your home directory. If partio can't find the session:
+
+- Ensure Claude Code has been used in the current repository at least once
+- Check that the session file hasn't been cleaned up before the commit
+
+### Attribution shows 100% unexpectedly
+
+If attribution calculation fails, partio defaults to 100% when an agent is active. This can happen if:
+
+- The commit has no parent (initial commit)
+- The diff cannot be computed
+
+### Hooks conflict with existing hooks
+
+partio backs up existing hooks as `<hook-name>.partio-backup` and chains to them after its own logic. If you're experiencing conflicts:
+
+1. Check `.git/hooks/` for backup files
+2. Run `partio disable` then `partio enable` to reinstall
+3. Verify the hook scripts contain the `# Installed by partio` marker

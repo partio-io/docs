@@ -1,0 +1,46 @@
+---
+title: Introduction
+description: "Capture the why behind your code changes"
+---
+
+# Welcome to partio
+
+**partio** is an open-source CLI that captures AI agent sessions alongside Git commits. It hooks into your existing Git workflow to automatically preserve the reasoning, prompts, and full conversation transcripts that produced each code change.
+
+## The Problem
+
+Git tracks _what_ changed. But when AI agents write code, the most valuable context — the reasoning, the prompts, the back-and-forth — lives in ephemeral terminal sessions that vanish when you close your editor.
+
+Months later, you're staring at a function and asking: _why was it written this way?_
+
+## The Solution
+
+partio captures the _why_ automatically:
+
+- **Zero friction** — one command to enable, then forget about it
+- **Git native** — checkpoint data lives on an orphan branch in your repo
+- **Agent detection** — automatically detects Claude Code sessions
+- **Attribution** — tracks what percentage of each commit was AI-generated
+- **Time travel** — rewind to any checkpoint and explore the full AI conversation
+
+## How it works
+
+1. Run `partio enable` in any Git repository
+2. Work with your AI agent as usual
+3. When you commit, partio detects the active session and captures everything
+4. Checkpoint data pushes alongside your code
+
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Get up and running in under a minute
+  </Card>
+  <Card title="Core Concepts" icon="book" href="/core-concepts">
+    Understand sessions, checkpoints, and strategies
+  </Card>
+  <Card title="CLI Commands" icon="terminal" href="/cli/commands">
+    Full reference for all partio commands
+  </Card>
+  <Card title="Claude Code" icon="robot" href="/integrations/claude-code">
+    How partio works with Claude Code
+  </Card>
+</CardGroup>

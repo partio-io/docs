@@ -1,0 +1,126 @@
+---
+title: Quick Start
+description: "Get up and running with partio in under a minute"
+---
+
+# Quick Start
+
+## Install
+
+<Tabs>
+  <Tab title="Homebrew">
+    ```bash
+    brew install ArvosAI/tap/partio
+    ```
+  </Tab>
+  <Tab title="Go Install">
+    ```bash
+    go install github.com/ArvosAI/partio@latest
+    ```
+  </Tab>
+  <Tab title="From Source">
+    ```bash
+    git clone https://github.com/ArvosAI/partio.git
+    cd partio
+    go build -o partio ./cmd/partio
+    sudo mv partio /usr/local/bin/
+    ```
+  </Tab>
+</Tabs>
+
+Verify the installation:
+
+```bash
+partio version
+# partio v0.1.0
+```
+
+## Enable in a repository
+
+Navigate to any Git repository and enable partio:
+
+```bash
+cd your-project
+partio enable
+```
+
+You'll see:
+
+```
+partio enabled successfully!
+  - Created .partio/ config directory
+  - Installed git hooks (pre-commit, post-commit, pre-push)
+  - Ready to capture AI sessions on commit
+```
+
+That's it. No config files to write, no environment variables to set.
+
+## Your first checkpoint
+
+1. Start an AI coding session (e.g., open Claude Code)
+2. Make some changes to your code
+3. Commit as you normally would:
+
+```bash
+git commit -m "Add user authentication"
+```
+
+partio automatically:
+- Detects the running AI agent
+- Captures the session transcript, prompts, and context
+- Stores everything on the `partio/checkpoints/v1` branch
+- Appends attribution trailers to your commit message
+
+Your commit message will include:
+
+```
+Add user authentication
+
+Partio-Checkpoint: a3f8c2d14e9b
+Partio-Attribution: 87% agent
+```
+
+## Explore checkpoints
+
+List all captured checkpoints:
+
+```bash
+partio rewind --list
+```
+
+```
+Checkpoints:
+
+  a3f8c2d14e9b  branch=main  agent=87%  created=2026-02-17T14:30:00Z
+```
+
+Rewind to explore a specific checkpoint:
+
+```bash
+partio rewind --to a3f8c2d14e9b
+```
+
+This creates a new branch at that checkpoint so you can explore the code and AI session in context.
+
+## Verify everything is healthy
+
+```bash
+partio doctor
+```
+
+```
+[OK]   .partio/ directory exists
+[OK]   pre-commit hook installed
+[OK]   post-commit hook installed
+[OK]   pre-push hook installed
+[OK]   checkpoint branch exists
+[OK]   partio binary found (you're running it!)
+
+All checks passed!
+```
+
+## Next steps
+
+- Learn about [Core Concepts](/core-concepts) — sessions, checkpoints, and strategies
+- See the full [CLI Reference](/cli/commands)
+- Set up the [Claude Code integration](/integrations/claude-code)

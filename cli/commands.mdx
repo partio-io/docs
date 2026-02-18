@@ -1,0 +1,240 @@
+---
+title: Commands
+description: "Complete reference for all partio CLI commands"
+---
+
+# CLI Commands
+
+## Global flags
+
+| Flag | Type | Default | Description |
+|------|------|---------|-------------|
+| `--log-level` | string | From config | Override log level (`debug`, `info`, `warn`, `error`) |
+
+---
+
+## `partio enable`
+
+Enable partio in the current Git repository.
+
+```bash
+partio enable
+```
+
+**What it does:**
+
+1. Verifies you're inside a Git repository
+2. Creates the `.partio/` config directory
+3. Writes default `settings.json`
+4. Adds `.partio/settings.local.json` to `.gitignore`
+5. Installs Git hooks (`pre-commit`, `post-commit`, `pre-push`)
+6. Creates the `partio/checkpoints/v1` orphan branch
+
+**Output:**
+
+```
+partio enabled successfully!
+  - Created .partio/ config directory
+  - Installed git hooks (pre-commit, post-commit, pre-push)
+  - Ready to capture AI sessions on commit
+```
+
+If already enabled:
+
+```
+partio is already enabled in this repository.
+```
+
+---
+
+## `partio disable`
+
+Disable partio in the current repository.
+
+```bash
+partio disable [--remove-data]
+```
+
+| Flag | Type | Default | Description |
+|------|------|---------|-------------|
+| `--remove-data` | bool | `false` | Also delete the `.partio/` directory and all config |
+
+**What it does:**
+
+1. Removes partio-managed hooks from `.git/hooks/`
+2. Restores any backed-up original hooks
+3. If `--remove-data`: deletes `.partio/` directory
+
+**Output (default):**
+
+```
+partio disabled.
+  - Removed git hooks (originals restored from backup if present)
+  - Checkpoint data and config preserved (use --remove-data to delete)
+```
+
+---
+
+## `partio status`
+
+Show partio status for the current repository.
+
+```bash
+partio status
+```
+
+**Output (enabled):**
+
+```
+Repository: /path/to/your-project
+Branch:     main
+Status:     enabled
+Strategy:   manual-commit
+Agent:      claude-code
+Hooks:      installed
+Checkpoints: branch exists
+```
+
+**Output (not enabled):**
+
+```
+Repository: /path/to/your-project
+Branch:     main
+Status:     not enabled (run 'partio enable' to set up)
+```
+
+---
+
+## `partio rewind`
+
+List or restore checkpoints.
+
+```bash
+partio rewind --list
+partio rewind --to <checkpoint-id>
+```
+
+| Flag | Type | Default | Description |
+|------|------|---------|-------------|
+| `--list` | bool | `false` | List all stored checkpoints |
+| `--to` | string | `""` | Restore to a specific checkpoint ID (12 hex characters) |
+
+**`--list` output:**
+
+```
+Checkpoints:
+
+  a3f8c2d14e9b  branch=main           agent=87%   created=2026-02-17T14:30:00Z
+  bb12340092ac  branch=feature/auth    agent=100%  created=2026-02-16T09:15:22Z
+```
+
+**`--to` output:**
+
+```
+Rewinding to checkpoint a3f8c2d14e9b
+  Commit: 4f9a2c...
+  Branch: main
+  Context:
+  <session context summary>
+  Created branch: partio/rewind/a3f8c2d14e9b
+```
+
+This creates a new branch named `partio/rewind/<id>` checked out at the checkpoint's commit.
+
+---
+
+## `partio doctor`
+
+Check partio installation health.
+
+```bash
+partio doctor
+```
+
+**Checks performed:**
+
+1. `.partio/` directory exists
+2. `pre-commit` hook installed and managed by partio
+3. `post-commit` hook installed and managed by partio
+4. `pre-push` hook installed and managed by partio
+5. `partio/checkpoints/v1` branch exists
+6. partio binary found in PATH
+
+**Output (healthy):**
+
+```
+[OK]   .partio/ directory exists
+[OK]   pre-commit hook installed
+[OK]   post-commit hook installed
+[OK]   pre-push hook installed
+[OK]   checkpoint branch exists
+[OK]   partio binary found (you're running it!)
+
+All checks passed!
+```
+
+**Output (issues found):**
+
+```
+[WARN] .partio/ directory missing - run 'partio enable'
+[WARN] pre-commit hook missing
+[OK]   post-commit hook installed
+[WARN] post-commit hook exists but not managed by partio
+[WARN] checkpoint branch missing
+[OK]   partio binary found (you're running it!)
+
+4 issue(s) found. Run 'partio enable' to fix.
+```
+
+---
+
+## `partio reset`
+
+Reset the checkpoint branch. This deletes all stored checkpoint data and recreates the branch.
+
+```bash
+partio reset
+```
+
+**Output:**
+
+```
+Checkpoint branch reset successfully.
+```
+
+<Warning>This permanently deletes all checkpoint data. This cannot be undone.</Warning>
+
+---
+
+## `partio clean`
+
+Remove orphaned checkpoint data.
+
+```bash
+partio clean
+```
+
+Scans the checkpoint branch for data that no longer corresponds to any commit.
+
+**Output:**
+
+```
+Checkpoint data present on partio/checkpoints/v1 branch.
+To fully reset, run: partio reset
+```
+
+---
+
+## `partio version`
+
+Print the partio version.
+
+```bash
+partio version
+```
+
+**Output:**
+
+```
+partio v0.1.0
+```

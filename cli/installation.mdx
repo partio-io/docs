@@ -1,0 +1,125 @@
+---
+title: Installation
+description: "Install partio on macOS, Linux, or from source"
+---
+
+# Installation
+
+## Package managers
+
+<Tabs>
+  <Tab title="macOS (Homebrew)">
+    ```bash
+    brew install ArvosAI/tap/partio
+    ```
+  </Tab>
+  <Tab title="Linux (Homebrew)">
+    ```bash
+    brew install ArvosAI/tap/partio
+    ```
+
+    Homebrew on Linux works the same as macOS.
+  </Tab>
+  <Tab title="Go Install">
+    Requires Go 1.22 or later:
+
+    ```bash
+    go install github.com/ArvosAI/partio@latest
+    ```
+
+    Make sure `$GOPATH/bin` (usually `~/go/bin`) is in your `PATH`.
+  </Tab>
+  <Tab title="From Source">
+    ```bash
+    git clone https://github.com/ArvosAI/partio.git
+    cd partio
+    go build -o partio ./cmd/partio
+    sudo mv partio /usr/local/bin/
+    ```
+  </Tab>
+</Tabs>
+
+## Verify installation
+
+```bash
+partio version
+```
+
+You should see:
+
+```
+partio v0.1.0
+```
+
+## Shell completions
+
+partio is built with [Cobra](https://github.com/spf13/cobra) and supports shell completions:
+
+<Tabs>
+  <Tab title="Bash">
+    ```bash
+    partio completion bash > /etc/bash_completion.d/partio
+    ```
+  </Tab>
+  <Tab title="Zsh">
+    ```bash
+    partio completion zsh > "${fpath[1]}/_partio"
+    ```
+  </Tab>
+  <Tab title="Fish">
+    ```bash
+    partio completion fish > ~/.config/fish/completions/partio.fish
+    ```
+  </Tab>
+</Tabs>
+
+## Requirements
+
+- **Git** 2.25 or later (for orphan branch support)
+- **macOS** or **Linux** (Windows support is planned)
+
+## Upgrading
+
+<Tabs>
+  <Tab title="Homebrew">
+    ```bash
+    brew upgrade partio
+    ```
+  </Tab>
+  <Tab title="Go Install">
+    ```bash
+    go install github.com/ArvosAI/partio@latest
+    ```
+  </Tab>
+</Tabs>
+
+After upgrading, run `partio doctor` in your repositories to verify everything is healthy.
+
+## Uninstalling
+
+1. Disable partio in each repository:
+
+```bash
+partio disable --remove-data
+```
+
+2. Remove the binary:
+
+<Tabs>
+  <Tab title="Homebrew">
+    ```bash
+    brew uninstall partio
+    ```
+  </Tab>
+  <Tab title="Manual">
+    ```bash
+    rm $(which partio)
+    ```
+  </Tab>
+</Tabs>
+
+3. Optionally remove the global config:
+
+```bash
+rm -rf ~/.config/partio
+```

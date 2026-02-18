@@ -1,0 +1,90 @@
+---
+title: Core Concepts
+description: "Understand sessions, checkpoints, strategies, and how partio stores data"
+---
+
+# Core Concepts
+
+## Sessions
+
+A **session** is a single AI agent conversation — from the time you start interacting with an AI coding assistant to when you commit the resulting changes. partio captures:
+
+- **Full transcript** — the complete JSONL conversation log
+- **Context summary** — a markdown summary of what was discussed
+- **Initial prompt** — the first prompt that started the session
+- **Metadata** — agent name, token count, duration
+
+## Checkpoints
+
+A **checkpoint** is the snapshot partio creates when you make a Git commit while an AI agent is active. Each checkpoint contains:
+
+| Field | Description |
+|-------|-------------|
+| `id` | 12-character hex identifier (e.g., `a3f8c2d14e9b`) |
+| `session_id` | UUID of the AI agent session |
+| `commit_hash` | The Git commit SHA this checkpoint is linked to |
+| `branch` | The Git branch at the time of commit |
+| `agent` | The detected agent (e.g., `claude-code`) |
+| `agent_percent` | Percentage of the diff attributed to the AI (0-100) |
+| `created_at` | RFC3339 timestamp |
+
+## Storage layout
+
+Checkpoint data lives on a Git orphan branch named `partio/checkpoints/v1`. No files are created in your working directory — everything is stored as Git objects using raw plumbing commands.
+
+```
+partio/checkpoints/v1  (branch)
+└── <shard>/           (first 2 hex chars of ID)
+    └── <rest>/        (remaining 10 hex chars)
+        ├── metadata.json
+        └── 0/
+            ├── content_hash.txt
+            ├── context.md
+            ├── full.jsonl
+            ├── metadata.json
+            └── prompt.txt
+```
+
+The two-level shard structure (e.g., `a3/f8c2d14e9b/`) mirrors Git's own object store to limit directory fanout.
+
+### Why an orphan branch?
+
+- **Travels with your code** — `git push` can include it automatically
+- **No working directory clutter** — data is stored as Git objects only
+- **Standard Git tooling** — you can inspect it with `git log`, `git show`, etc.
+- **Easy cleanup** — `partio reset` recreates the branch from scratch
+
+## Git hooks
+
+partio installs three Git hooks to capture sessions automatically:
+
+| Hook | When it runs | What it does |
+|------|-------------|-------------|
+| `pre-commit` | Before a commit is created | Detects if an AI agent is running; saves session state to `.partio/state/` |
+| `post-commit` | After a commit is created | Reads the saved state, captures the session, writes the checkpoint, and adds attribution trailers |
+| `pre-push` | Before a push to remote | Pushes the `partio/checkpoints/v1` branch alongside your code |
+
+All hooks are non-blocking — they never prevent your commit or push from completing. If anything goes wrong, partio logs a warning and continues.
+
+Existing hooks are backed up as `<hook-name>.partio-backup` and chained after partio's logic.
+
+## Git commit trailers
+
+After creating a checkpoint, partio amends the commit to add two trailers:
+
+```
+Partio-Checkpoint: a3f8c2d14e9b
+Partio-Attribution: 87% agent
+```
+
+These are standard [Git trailers](https://git-scm.com/docs/git-interpret-trailers) and can be parsed by any tool that reads commit messages.
+
+## Strategies
+
+A **strategy** defines when and how partio captures checkpoints. Currently, one strategy is available:
+
+### `manual-commit`
+
+Captures a checkpoint on every `git commit` when an AI agent is detected. This is the default and recommended strategy — it works with your existing workflow without any changes.
+
+See [Strategies](/cli/strategies) for more details.

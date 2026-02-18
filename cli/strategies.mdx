@@ -1,0 +1,60 @@
+---
+title: Strategies
+description: "How partio decides when to capture checkpoints"
+---
+
+# Strategies
+
+A strategy defines when and how partio creates checkpoints. The strategy is configured via the `strategy` field in your settings.
+
+## `manual-commit`
+
+**This is the default and recommended strategy.**
+
+Captures a checkpoint every time you run `git commit` while an AI agent is detected as active.
+
+### How it works
+
+1. **Pre-commit hook** runs before your commit:
+   - Checks if an AI agent process (e.g., Claude Code) is running
+   - If found, locates the active session file
+   - Saves state to `.partio/state/pre-commit.json`
+
+2. **Post-commit hook** runs after your commit:
+   - Reads the saved pre-commit state
+   - If an agent was active, captures the session data
+   - Writes the checkpoint to the orphan branch
+   - Amends the commit with attribution trailers
+
+3. **Pre-push hook** runs before `git push`:
+   - Pushes `partio/checkpoints/v1` to the remote
+
+### When checkpoints are NOT created
+
+- No AI agent process is detected
+- partio is disabled (`enabled: false` or `PARTIO_ENABLED=false`)
+- The `.partio/` directory doesn't exist
+- The pre-commit state file is missing (e.g., hooks weren't installed)
+
+### Configuration
+
+```json title=".partio/settings.json"
+{
+  "strategy": "manual-commit",
+  "strategy_options": {
+    "push_sessions": true
+  }
+}
+```
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `push_sessions` | `true` | Automatically push checkpoint branch on `git push` |
+
+### Non-blocking behavior
+
+Both hooks are designed to never block your Git operations:
+
+- If agent detection fails, the commit proceeds normally (no checkpoint)
+- If checkpoint writing fails, a warning is logged but the commit is preserved
+- If pushing the checkpoint branch fails, a warning is logged but your push completes
