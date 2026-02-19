@@ -10,29 +10,29 @@ description: "Install partio on macOS, Linux, or from source"
 <Tabs>
   <Tab title="macOS (Homebrew)">
     ```bash
-    brew install ArvosAI/tap/partio
+    brew install partio-io/tap/partio
     ```
   </Tab>
   <Tab title="Linux (Homebrew)">
     ```bash
-    brew install ArvosAI/tap/partio
+    brew install partio-io/tap/partio
     ```
 
     Homebrew on Linux works the same as macOS.
   </Tab>
   <Tab title="Go Install">
-    Requires Go 1.22 or later:
+    Requires Go 1.25 or later:
 
     ```bash
-    go install github.com/ArvosAI/partio@latest
+    go install github.com/partio-io/cli/cmd/partio@latest
     ```
 
     Make sure `$GOPATH/bin` (usually `~/go/bin`) is in your `PATH`.
   </Tab>
   <Tab title="From Source">
     ```bash
-    git clone https://github.com/ArvosAI/partio.git
-    cd partio
+    git clone https://github.com/partio-io/cli.git
+    cd cli
     go build -o partio ./cmd/partio
     sudo mv partio /usr/local/bin/
     ```
@@ -88,7 +88,7 @@ partio is built with [Cobra](https://github.com/spf13/cobra) and supports shell 
   </Tab>
   <Tab title="Go Install">
     ```bash
-    go install github.com/ArvosAI/partio@latest
+    go install github.com/partio-io/cli/cmd/partio@latest
     ```
   </Tab>
 </Tabs>
