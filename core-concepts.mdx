@@ -88,3 +88,23 @@ A **strategy** defines when and how partio captures checkpoints. Currently, one 
 Captures a checkpoint on every `git commit` when an AI agent is detected. This is the default and recommended strategy — it works with your existing workflow without any changes.
 
 See [Strategies](/cli/strategies) for more details.
+
+## Git Worktrees
+
+partio fully supports [git worktrees](https://git-scm.com/docs/git-worktree). If you use worktrees to work on multiple branches simultaneously, partio works across all of them without any extra setup.
+
+### How it works
+
+- **Shared hooks** — Hooks are installed to the shared git directory (`git rev-parse --git-common-dir`), not the per-worktree `.git` file. This means `partio enable` in any one worktree activates hooks for all worktrees in that repository.
+- **Session discovery** — partio walks up from the repository root to parent directories when looking for the active Claude Code session. This handles worktree layouts where Claude Code was launched from a parent workspace directory.
+- **Shared checkpoint storage** — All worktrees share the same `partio/checkpoints/v1` orphan branch, since it lives in the shared object database.
+
+### Setup
+
+Just run `partio enable` from any worktree — the hooks will be shared across all worktrees automatically:
+
+```bash
+cd my-project-feature-branch   # a worktree
+partio enable
+# Hooks are now active in every worktree for this repo
+```

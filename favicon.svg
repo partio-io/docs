@@ -1,0 +1,33 @@
+<svg width="32" height="32" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Purple rounded background -->
+  <rect width="200" height="200" rx="44" fill="#7B2D8E"/>
+  <!-- Squirrel head with ears (white silhouette) -->
+  <path d="
+    M 100 174
+    C 148 174, 168 148, 165 112
+    C 163 88, 155 72, 148 62
+    C 142 48, 146 34, 143 26
+    C 139 20, 132 28, 126 44
+    C 120 56, 112 62, 100 64
+    C 88 62, 80 56, 74 44
+    C 68 28, 61 20, 57 26
+    C 54 34, 58 48, 52 62
+    C 45 72, 37 88, 35 112
+    C 32 148, 52 174, 100 174
+    Z
+  " fill="white"/>
+  <!-- Left ear inner marking -->
+  <path d="M 63 32 L 73 56 L 60 48 Z" fill="#7B2D8E"/>
+  <!-- Right ear inner marking -->
+  <path d="M 137 32 L 127 56 L 140 48 Z" fill="#7B2D8E"/>
+  <!-- Left eye -->
+  <circle cx="78" cy="108" r="20" fill="#7B2D8E"/>
+  <circle cx="72" cy="102" r="5" fill="white"/>
+  <!-- Right eye -->
+  <circle cx="122" cy="108" r="20" fill="#7B2D8E"/>
+  <circle cx="116" cy="102" r="5" fill="white"/>
+  <!-- Nose -->
+  <ellipse cx="100" cy="137" rx="6" ry="5" fill="#7B2D8E"/>
+  <!-- Mouth (cat/w-shape) -->
+  <path d="M 86 150 Q 93 160, 100 150 Q 107 160, 114 150" stroke="#7B2D8E" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
