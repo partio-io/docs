@@ -11,6 +11,7 @@ A **session** is a single AI agent conversation — from the time you start inte
 
 - **Full transcript** — the complete JSONL conversation log
 - **Context summary** — a markdown summary of what was discussed
+- **Diff** — the unified diff for the commit
 - **Initial prompt** — the first prompt that started the session
 - **Metadata** — agent name, token count, duration
 
@@ -40,6 +41,7 @@ partio/checkpoints/v1  (branch)
         └── 0/
             ├── content_hash.txt
             ├── context.md
+            ├── diff.patch
             ├── full.jsonl
             ├── metadata.json
             └── prompt.txt
@@ -61,7 +63,7 @@ partio installs three Git hooks to capture sessions automatically:
 | Hook | When it runs | What it does |
 |------|-------------|-------------|
 | `pre-commit` | Before a commit is created | Detects if an AI agent is running; saves session state to `.partio/state/` |
-| `post-commit` | After a commit is created | Reads the saved state, captures the session, writes the checkpoint, and adds attribution trailers |
+| `post-commit` | After a commit is created | Reads the saved state, captures the session, amends attribution trailers, and writes the checkpoint |
 | `pre-push` | Before a push to remote | Pushes the `partio/checkpoints/v1` branch alongside your code |
 
 All hooks are non-blocking — they never prevent your commit or push from completing. If anything goes wrong, partio logs a warning and continues.
@@ -96,7 +98,7 @@ partio fully supports [git worktrees](https://git-scm.com/docs/git-worktree). If
 ### How it works
 
 - **Shared hooks** — Hooks are installed to the shared git directory (`git rev-parse --git-common-dir`), not the per-worktree `.git` file. This means `partio enable` in any one worktree activates hooks for all worktrees in that repository.
-- **Session discovery** — partio walks up from the repository root to parent directories when looking for the active Claude Code session. This handles worktree layouts where Claude Code was launched from a parent workspace directory.
+- **Session discovery** — partio checks the repository root and its immediate parent directory when looking for the active Claude Code session. When both have matching session directories, the one with the most recently modified session file is used.
 - **Shared checkpoint storage** — All worktrees share the same `partio/checkpoints/v1` orphan branch, since it lives in the shared object database.
 
 ### Setup
