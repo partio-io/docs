@@ -12,6 +12,7 @@ A **session** is a single AI agent conversation — from the time you start inte
 - **Full transcript** — the complete JSONL conversation log
 - **Context summary** — a markdown summary of what was discussed
 - **Initial prompt** — the first prompt that started the session
+- **Plan file** — the agent's plan file, if one exists (e.g., Claude Code plans)
 - **Metadata** — agent name, token count, duration
 
 ## Checkpoints
@@ -26,6 +27,7 @@ A **checkpoint** is the snapshot partio creates when you make a Git commit while
 | `branch` | The Git branch at the time of commit |
 | `agent` | The detected agent (e.g., `claude-code`) |
 | `agent_percent` | Percentage of the diff attributed to the AI (0-100) |
+| `plan_slug` | Slug identifying the agent's plan file, if any |
 | `created_at` | RFC3339 timestamp |
 
 ## Storage layout
@@ -40,8 +42,10 @@ partio/checkpoints/v1  (branch)
         └── 0/
             ├── content_hash.txt
             ├── context.md
+            ├── diff.patch
             ├── full.jsonl
             ├── metadata.json
+            ├── plan.md
             └── prompt.txt
 ```
 
