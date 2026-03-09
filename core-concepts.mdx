@@ -26,6 +26,7 @@ A **checkpoint** is the snapshot partio creates when you make a Git commit while
 | `branch` | The Git branch at the time of commit |
 | `agent` | The detected agent (e.g., `claude-code`) |
 | `agent_percent` | Percentage of the diff attributed to the AI (0-100) |
+| `plan_slug` | Identifier linking to the agent's plan (if one exists) |
 | `created_at` | RFC3339 timestamp |
 
 ## Storage layout
@@ -42,6 +43,7 @@ partio/checkpoints/v1  (branch)
             ├── context.md
             ├── full.jsonl
             ├── metadata.json
+            ├── plan.md
             └── prompt.txt
 ```
 
