@@ -143,6 +143,48 @@ This creates a new branch named `partio/rewind/<id>` checked out at the checkpoi
 
 ---
 
+## `partio resume`
+
+Resume a session from a checkpoint. Reads checkpoint data from the orphan branch and launches a new Claude Code session with the previous context.
+
+```bash
+partio resume <checkpoint-id>
+```
+
+| Flag | Type | Default | Description |
+|------|------|---------|-------------|
+| `--print` | bool | `false` | Print the composed context prompt to stdout |
+| `--copy` | bool | `false` | Copy the context prompt to clipboard |
+| `--branch` | bool | `false` | Create a branch at the checkpoint's commit before launching |
+
+**Default behavior:**
+
+Writes a context file to a temporary directory and launches Claude Code with instructions to read it and continue the previous work. If Claude Code is not found in PATH, the context is printed to stdout instead.
+
+**With `--branch`:**
+
+Creates a new branch named `partio/resume/<id>` checked out at the checkpoint's commit before launching.
+
+```
+Created branch: partio/resume/a3f8c2d14e9b
+Context written to /tmp/partio-resume-a3f8c2d14e9b.md
+Launching Claude Code...
+```
+
+**With `--print`:**
+
+```bash
+partio resume a3f8c2d14e9b --print
+```
+
+Prints the composed context prompt (including the original request, plan, diff, and session metadata) to stdout without launching Claude Code.
+
+**With `--copy`:**
+
+Copies the context prompt to the system clipboard (macOS and Linux).
+
+---
+
 ## `partio doctor`
 
 Check partio installation health.
