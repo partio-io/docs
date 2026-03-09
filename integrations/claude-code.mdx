@@ -26,6 +26,7 @@ For each commit made while Claude Code is active, partio captures:
 | `context.md` | A summary of the session context |
 | `diff.patch` | The unified diff for the commit |
 | `prompt.txt` | The initial prompt that started the session |
+| `plan.md` | The Claude Code plan file, if the session used a plan |
 | `metadata.json` | Session metadata (agent, token count, duration) |
 
 ### Session metadata
@@ -37,6 +38,12 @@ For each commit made while Claude Code is active, partio captures:
   "duration": "8m42.5s"
 }
 ```
+
+### Plan capture
+
+When a Claude Code session uses a [plan](https://docs.anthropic.com/en/docs/claude-code/plan-mode), partio extracts the plan slug from the session transcript and reads the corresponding plan file from `~/.claude/plans/<slug>.md`. The plan is stored as `plan.md` in the checkpoint, providing the high-level intent alongside the transcript and diff.
+
+If no plan was used or the plan file is missing, `plan.md` is empty.
 
 ## JSONL format
 
