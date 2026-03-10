@@ -18,8 +18,17 @@ cli/
   commands.mdx             # CLI command reference
   configuration.mdx        # Config files, env vars
   strategies.mdx           # Capture strategies
+app/
+  overview.mdx             # Dashboard overview (stats, heatmap, recent commits)
+  repositories.mdx         # Repository browser (search, filter, list)
+  repository-detail.mdx    # Per-repo tabs (Overview, Checkpoints, Commits, PRs, Code)
+  checkpoint-detail.mdx    # Checkpoint deep dive (Sessions, Plan, Files)
+  settings.mdx             # Theme customization (50+ OMARCHY themes)
+  self-hosting.mdx         # Self-hosting guide (env vars, install, production)
 integrations/
   claude-code.mdx          # Claude Code integration guide
+images/
+  app/                     # Auto-generated GIFs for app documentation
 logo/                      # Logo SVGs for dark/light themes
 favicon.svg                # Site favicon
 ```
@@ -46,7 +55,7 @@ description: "Short description for SEO and navigation"
 
 Configured in `mint.json`:
 
-- **Tabs** define top-level sections (`CLI Reference`, `Integrations`)
+- **Tabs** define top-level sections (`CLI Reference`, `App`, `Integrations`)
 - **navigation** arrays define page ordering within each tab/group
 - Pages are referenced by their file path without extension (e.g., `cli/installation`)
 

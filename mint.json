@@ -25,16 +25,6 @@
     "name": "GitHub",
     "url": "https://github.com/partio-io/cli"
   },
-  "tabs": [
-    {
-      "name": "CLI Reference",
-      "url": "cli"
-    },
-    {
-      "name": "Integrations",
-      "url": "integrations"
-    }
-  ],
   "navigation": [
     {
       "group": "Getting Started",
@@ -47,6 +37,17 @@
         "cli/commands",
         "cli/configuration",
         "cli/strategies"
+      ]
+    },
+    {
+      "group": "App",
+      "pages": [
+        "app/overview",
+        "app/repositories",
+        "app/repository-detail",
+        "app/checkpoint-detail",
+        "app/settings",
+        "app/self-hosting"
       ]
     },
     {
