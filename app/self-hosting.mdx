@@ -1,0 +1,64 @@
+---
+title: Self-Hosting
+description: "Run the partio dashboard on your own infrastructure"
+---
+
+# Self-Hosting
+
+The partio dashboard can be self-hosted for teams that want full control over their data and deployment.
+
+## Prerequisites
+
+- **Node.js 20+**
+- **GitHub OAuth App** — Create one at [github.com/settings/developers](https://github.com/settings/developers)
+  - Set the callback URL to `http://localhost:3000/api/auth/callback/github` (or your production URL)
+
+## Environment Variables
+
+Create a `.env.local` file in the `app/` directory:
+
+```bash
+GITHUB_CLIENT_ID=your_github_oauth_client_id
+GITHUB_CLIENT_SECRET=your_github_oauth_client_secret
+AUTH_SECRET=a_random_secret_string  # Generate with: openssl rand -base64 32
+```
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GITHUB_CLIENT_ID` | Yes | From your GitHub OAuth App settings |
+| `GITHUB_CLIENT_SECRET` | Yes | From your GitHub OAuth App settings |
+| `AUTH_SECRET` | Yes | Random string used to encrypt sessions |
+
+## Install & Run
+
+```bash
+cd app
+npm install
+npm run dev
+```
+
+The dashboard will be available at `http://localhost:3000`. Sign in with your GitHub account to start browsing checkpoints.
+
+## Production Build
+
+```bash
+cd app
+npm run build
+npm start
+```
+
+For production deployments:
+
+- Set the GitHub OAuth callback URL to your production domain
+- Use a strong `AUTH_SECRET` value
+- Deploy behind HTTPS
+
+<Warning>
+  The dashboard uses NextAuth v5 (beta). The `AUTH_SECRET` must be set in production — NextAuth will not start without it.
+</Warning>
+
+## Architecture Notes
+
+- **Auth**: NextAuth v5 with GitHub OAuth provider. Sessions use JWT strategy.
+- **Data**: All data is fetched from GitHub via Octokit using the authenticated user's access token. No additional database is required.
+- **Themes**: Theme color files are fetched from GitHub and cached with 24-hour revalidation.

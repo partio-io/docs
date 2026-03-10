@@ -1,0 +1,56 @@
+---
+title: Checkpoint Detail
+description: "Deep dive into a checkpoint's sessions, plan, and file changes"
+---
+
+# Checkpoint Detail
+
+The checkpoint detail page (`/:owner/:repo/checkpoints/:id`) is where you explore the full context behind a code change — the conversation, the plan, and the diff.
+
+<img src="/images/app/checkpoint-detail.gif" alt="Exploring checkpoint sessions, plan, and files" />
+
+## Header
+
+The header shows key metadata at a glance:
+
+| Field | Description |
+|-------|-------------|
+| **Title** | First user message from the session (truncated to 100 characters) |
+| **Checkpoint ID** | First 8 characters of the checkpoint hash |
+| **Commit** | First 8 characters of the associated commit hash |
+| **Timestamp** | Relative time since the checkpoint was created |
+| **Branch** | The Git branch this checkpoint was captured on |
+| **Tokens** | Total tokens consumed during the session (if available) |
+| **Agent** | Agent name and AI authorship percentage |
+
+An **Actions** button in the top-right provides:
+- Copy checkpoint ID to clipboard
+- Download plan (if available)
+- Share/export options based on the active tab
+
+## Tabs
+
+### Sessions
+
+The transcript viewer displays the full conversation between the human and the AI agent:
+
+- **Message bubbles** — Each message shows the role (human or assistant), content, and timestamp
+- **Token counts** — Per-message token usage when available
+- **Tool calls** — Tool names shown as pills/badges on assistant messages
+- **Avatars** — User image and agent icon displayed alongside messages
+
+This is the core "why" that partio captures — the reasoning and back-and-forth that produced the code change.
+
+### Plan
+
+If the agent generated a plan during the session, it's rendered as formatted markdown. This tab only appears when plan data exists (`plan_slug` is set on the checkpoint).
+
+The plan typically contains the agent's high-level strategy, step-by-step breakdown, and reasoning for the approach taken.
+
+### Files
+
+A unified diff viewer showing all file changes in this checkpoint:
+
+- File-by-file breakdown with added/removed/modified indicators
+- Syntax-highlighted diffs with line numbers
+- File count shown in the tab badge
