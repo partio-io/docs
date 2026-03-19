@@ -33,6 +33,7 @@
     {
       "group": "CLI Reference",
       "pages": [
+        "cli/overview",
         "cli/installation",
         "cli/commands",
         "cli/configuration",
