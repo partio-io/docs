@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "scripts": {
+    "record:extension": "npx tsx scripts/record-extension.ts"
+  },
+  "devDependencies": {
+    "puppeteer": "^23.0.0",
+    "gif-encoder-2": "^1.0.5",
+    "pngjs": "^7.0.0",
+    "@types/pngjs": "^6.0.0",
+    "tsx": "^4.0.0"
+  }
+}

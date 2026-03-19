@@ -52,6 +52,14 @@
       ]
     },
     {
+      "group": "Extension",
+      "pages": [
+        "extension/overview",
+        "extension/features",
+        "extension/troubleshooting"
+      ]
+    },
+    {
       "group": "Integrations",
       "pages": ["integrations/claude-code"]
     }
