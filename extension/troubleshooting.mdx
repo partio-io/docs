@@ -1,0 +1,79 @@
+---
+title: Troubleshooting
+description: "Common issues with the partio Chrome extension and how to resolve them"
+---
+
+# Troubleshooting
+
+## Panel Not Appearing
+
+### No checkpoint exists for this commit
+
+The extension only shows a panel when it finds a matching checkpoint. If the commit was made without partio enabled, or the checkpoint hasn't been pushed yet, no panel will appear.
+
+- Run `partio status` in the repository to confirm checkpoints are being created
+- Check that the `partio/checkpoints/v1` orphan branch has been pushed to GitHub
+
+### Not authenticated
+
+The extension requires a valid connection to app.partio.io and a GitHub token with `repo` scope.
+
+1. Click the Partio icon in the toolbar — if it shows "Not connected", click **Connect**
+2. If connecting fails, sign in to [app.partio.io](https://app.partio.io) first, then try again
+
+### Page type not supported
+
+The extension only activates on commit pages, pull request pages, and pages with commit links. Other GitHub pages (issues, discussions, repository root) are not supported.
+
+## Authentication Problems
+
+### Session not detected
+
+The extension looks for an AuthJS session cookie from `app.partio.io`. If it can't find one:
+
+1. Open [app.partio.io](https://app.partio.io) and verify you're signed in
+2. Click the Partio icon and click **Connect**
+3. If you still can't connect, try signing out of app.partio.io and signing back in
+
+### Token expired
+
+GitHub tokens can expire or be revoked. If the extension stops showing data:
+
+1. Click the Partio icon — if it shows your username, click **Disconnect**
+2. Click **Connect** to re-authenticate and get a fresh token
+
+### Auto-reconnect not working
+
+If you explicitly disconnected via the popup, the extension sets a flag that prevents auto-reconnection. Click **Connect** to clear this flag and re-enable automatic session syncing.
+
+## Badges Not Showing
+
+### No checkpoints in repository
+
+Commit list badges only appear for commits that have matching checkpoints. If no checkpoints exist in the repository, no badges will appear.
+
+### GitHub SPA navigation
+
+GitHub uses client-side navigation (Turbo/PJAX). The extension listens for these events, but in rare cases the event may not fire. A full page reload (`Cmd+Shift+R` / `Ctrl+Shift+R`) will re-trigger badge injection.
+
+## Data and Privacy
+
+### Where is data stored?
+
+| Data | Location |
+|------|----------|
+| GitHub token | `chrome.storage.local` (browser-managed encryption at rest) |
+| Username and auth status | `chrome.storage.local` |
+| Checkpoint cache | `chrome.storage.local` (5-minute TTL, auto-expires) |
+| Checkpoint data | Read from the `partio/checkpoints/v1` branch on GitHub via API |
+
+### What network requests does the extension make?
+
+The extension only communicates with two services:
+
+- **GitHub API** (`api.github.com`) — reads checkpoint data from the orphan branch using your token
+- **app.partio.io** — checks your authentication session
+
+### Does the extension collect analytics?
+
+No. The extension does not send telemetry, usage data, or any information to third parties.
