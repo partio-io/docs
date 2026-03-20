@@ -18,8 +18,12 @@ description: "Complete reference for all partio CLI commands"
 Enable partio in the current Git repository.
 
 ```bash
-partio enable
+partio enable [--absolute-path]
 ```
+
+| Flag | Type | Default | Description |
+|------|------|---------|-------------|
+| `--absolute-path` | bool | `false` | Install hooks using the absolute path to the partio binary |
 
 **What it does:**
 
@@ -29,6 +33,16 @@ partio enable
 4. Adds `.partio/settings.local.json` to `.gitignore`
 5. Installs Git hooks (`pre-commit`, `post-commit`, `pre-push`)
 6. Creates the `partio/checkpoints/v1` orphan branch
+
+**`--absolute-path`:**
+
+By default, hooks invoke `partio` by name and rely on PATH resolution at hook execution time. Use `--absolute-path` if partio is not on PATH in your hook execution environment — for example, when using nix, asdf, mise, or system-level git hooks.
+
+```bash
+partio enable --absolute-path
+```
+
+This embeds the resolved absolute path of the partio binary into the installed hook scripts.
 
 **Output:**
 
