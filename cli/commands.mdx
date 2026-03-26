@@ -32,7 +32,7 @@ partio enable [--absolute-path]
 3. Writes default `settings.json`
 4. Adds `.partio/settings.local.json` to `.gitignore`
 5. Installs Git hooks (`pre-commit`, `post-commit`, `pre-push`)
-6. Creates the `partio/checkpoints/v1` orphan branch
+6. Creates the `partio/checkpoints/v1` branch — if a remote tracking branch already exists (e.g., on a fresh clone), the local branch is created from the remote to preserve existing checkpoint history; otherwise a new orphan branch is created
 
 **`--absolute-path`:**
 
@@ -50,6 +50,16 @@ This embeds the resolved absolute path of the partio binary into the installed h
 partio enabled successfully!
   - Created .partio/ config directory
   - Installed git hooks (pre-commit, post-commit, pre-push)
+  - Ready to capture AI sessions on commit
+```
+
+On a fresh clone where checkpoint history already exists on the remote:
+
+```
+partio enabled successfully!
+  - Created .partio/ config directory
+  - Installed git hooks (pre-commit, post-commit, pre-push)
+  - Restored checkpoint history from remote branch
   - Ready to capture AI sessions on commit
 ```
 
