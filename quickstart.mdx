@@ -55,6 +55,16 @@ partio enabled successfully!
 
 That's it. No config files to write, no environment variables to set.
 
+If you cloned a repository where partio was already in use, the remote checkpoint branch is detected automatically and your local branch is set up to track it — no manual `git fetch` required:
+
+```
+partio enabled successfully!
+  - Created .partio/ config directory
+  - Installed git hooks (pre-commit, post-commit, pre-push)
+  - Restored checkpoint history from remote branch
+  - Ready to capture AI sessions on commit
+```
+
 ## Your first checkpoint
 
 1. Start an AI coding session (e.g., open Claude Code)
