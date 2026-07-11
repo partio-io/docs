@@ -61,7 +61,7 @@
     },
     {
       "group": "Integrations",
-      "pages": ["integrations/claude-code"]
+      "pages": ["integrations/claude-code", "integrations/codex"]
     }
   ],
   "footerSocials": {

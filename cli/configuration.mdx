@@ -11,9 +11,13 @@ description: "Configure partio behavior with settings files and environment vari
 |-------|------|---------|-------------|
 | `enabled` | bool | `true` | Whether partio is active |
 | `strategy` | string | `"manual-commit"` | Capture strategy |
-| `agent` | string | `"claude-code"` | Name of the AI agent being tracked |
+| `agent` | string | `""` | AI agent to track. Empty auto-detects the running agent (`claude-code` or `codex`) |
+| `commit_linking` | string | `"ask"` | When to link commits to an active session: `ask`, `always`, or `never` |
 | `log_level` | string | `"info"` | Log verbosity: `debug`, `info`, `warn`, `error` |
 | `strategy_options.push_sessions` | bool | `true` | Push checkpoint branch on `git push` |
+| `redact.enabled` | bool | `true` | Redact secrets from checkpoint data before it is stored |
+| `redact.entropy_threshold` | float | `4.5` | Shannon entropy (bits/char) above which a token is redacted |
+| `redact.entropy_min_length` | int | `20` | Minimum token length considered for entropy scanning |
 
 ## Default settings.json
 
@@ -23,10 +27,16 @@ Created by `partio enable`:
 {
   "enabled": true,
   "strategy": "manual-commit",
-  "agent": "claude-code",
+  "agent": "",
+  "commit_linking": "ask",
   "log_level": "info",
   "strategy_options": {
     "push_sessions": true
+  },
+  "redact": {
+    "enabled": true,
+    "entropy_threshold": 4.5,
+    "entropy_min_length": 20
   }
 }
 ```
@@ -52,7 +62,66 @@ Only fields actually present in a config file override the accumulated config. U
 | `PARTIO_ENABLED` | `enabled` | `true`, `1` (case-insensitive) for enabled; anything else for disabled |
 | `PARTIO_STRATEGY` | `strategy` | Strategy name (e.g., `manual-commit`) |
 | `PARTIO_LOG_LEVEL` | `log_level` | `debug`, `info`, `warn`, `error` |
-| `PARTIO_AGENT` | `agent` | Agent name (e.g., `claude-code`) |
+| `PARTIO_AGENT` | `agent` | Agent name (e.g., `claude-code`, `codex`) |
+| `PARTIO_COMMIT_LINKING` | `commit_linking` | `ask`, `always`, `never` |
+
+## Choosing the agent
+
+partio supports multiple AI coding agents — currently [Claude Code](/integrations/claude-code) and [Codex](/integrations/codex).
+
+When `agent` is empty (the default), partio **auto-detects** whichever supported agent is running when you commit. Set `agent` (or `PARTIO_AGENT`) only when you want to pin a specific agent — for example, if you run more than one and want partio to prefer a particular one:
+
+```json title=".partio/settings.json"
+{
+  "agent": "codex"
+}
+```
+
+If the pinned agent isn't running at commit time, partio falls back to auto-detection.
+
+## Commit linking
+
+When you commit with an AI session active, partio links that commit to the session and creates a checkpoint. The `commit_linking` setting controls whether it asks first:
+
+| Value | Behavior |
+|-------|----------|
+| `ask` (default) | Show a `[Y/n/a]` prompt during the commit when a session is active |
+| `always` | Always link, no prompt |
+| `never` | Never link — no checkpoint is created |
+
+With `ask`, the prompt accepts:
+
+- **Y** (default) — link this commit to the session
+- **n** — skip linking for this commit only
+- **a** — always link from now on (persists `commit_linking: always` to `.partio/settings.json`)
+
+In non-interactive environments (no TTY — CI, scripted commits), partio auto-links without prompting.
+
+```bash
+# Never prompt, and skip session linking entirely
+PARTIO_COMMIT_LINKING=never git commit -m "Docs typo"
+```
+
+## Secret redaction
+
+Before any session data is written to the checkpoint branch, partio runs a two-layer secret redaction pass over all user-visible text fields (prompt, context, diff, JSONL transcript, and plan):
+
+1. **Pattern-based detection** — gitleaks-compatible regular expressions detect common secret formats including AWS access keys, GitHub personal access tokens, Slack tokens, Stripe keys, Google API keys, npm/PyPI tokens, and generic `api_key=…` / `Bearer …` assignments. Matched secrets are replaced with `[REDACTED]`.
+2. **Entropy-based detection** — any whitespace-delimited token that is at least `entropy_min_length` characters long and has a Shannon entropy ≥ `entropy_threshold` bits/char is also replaced with `[REDACTED]`. This catches high-entropy strings that match no known pattern, while leaving short version strings, commit hashes, URLs, and natural-language words intact.
+
+Redaction is enabled by default and tuned via the `redact` block:
+
+```json title=".partio/settings.json"
+{
+  "redact": {
+    "enabled": true,
+    "entropy_threshold": 4.5,
+    "entropy_min_length": 20
+  }
+}
+```
+
+<Warning>Redaction is a best-effort safety net, not a substitute for proper secret management (environment variables, secret managers). The git diff captured in a checkpoint may still contain other sensitive data depending on your code.</Warning>
 
 ## Examples
 
