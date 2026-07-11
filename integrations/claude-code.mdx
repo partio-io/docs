@@ -7,6 +7,8 @@ description: "How partio integrates with Claude Code"
 
 partio has first-class support for [Claude Code](https://docs.anthropic.com/en/docs/claude-code), Anthropic's AI coding assistant. When you use Claude Code in a partio-enabled repository, sessions are automatically captured alongside your commits.
 
+partio also supports [Codex](/integrations/codex). By default it auto-detects whichever agent is running — see [Choosing the agent](/cli/configuration#choosing-the-agent).
+
 ## Detection
 
 partio detects Claude Code by checking for a running Claude Code process. When the pre-commit hook fires, it:

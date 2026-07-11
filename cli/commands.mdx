@@ -28,11 +28,13 @@ partio enable [--absolute-path]
 **What it does:**
 
 1. Verifies you're inside a Git repository
-2. Creates the `.partio/` config directory
-3. Writes default `settings.json`
+2. Ensures the `.partio/` config directory exists
+3. Writes a default `settings.json` (existing config is preserved)
 4. Adds `.partio/settings.local.json` to `.gitignore`
 5. Installs Git hooks (`pre-commit`, `post-commit`, `pre-push`)
-6. Creates the `partio/checkpoints/v1` orphan branch
+6. Ensures the `partio/checkpoints/v1` orphan branch exists
+
+`partio enable` is **idempotent** — safe to re-run at any time to repair hooks or restore settings. Re-running preserves your existing configuration (it only flips `enabled` back to `true` if partio was disabled) and never overwrites custom values.
 
 **`--absolute-path`:**
 
@@ -48,15 +50,22 @@ This embeds the resolved absolute path of the partio binary into the installed h
 
 ```
 partio enabled successfully!
-  - Created .partio/ config directory
+  - Ensured .partio/ config directory exists
   - Installed git hooks (pre-commit, post-commit, pre-push)
   - Ready to capture AI sessions on commit
 ```
 
-If already enabled:
+**External hook managers:**
+
+If partio detects another Git hook manager — [Husky](https://typicode.github.io/husky/), [Lefthook](https://github.com/evilmartians/lefthook), or [Overcommit](https://github.com/sds/overcommit) — `partio enable` prints a warning with integration instructions and continues (it does not abort). partio's hooks must be invoked from within your hook manager's configuration via `partio _hook <hook-name>` so both run:
 
 ```
-partio is already enabled in this repository.
+Warning: Husky detected.
+  Partio's hooks must be called from within your hook manager's configuration.
+  Add partio hook calls to your Husky hook scripts. For example, in .husky/pre-commit add:
+    partio _hook pre-commit
+  and in .husky/post-commit add:
+    partio _hook post-commit
 ```
 
 ---
@@ -104,6 +113,7 @@ Repository: /path/to/your-project
 Branch:     main
 Status:     enabled
 Strategy:   manual-commit
+Linking:    ask
 Agent:      claude-code
 Hooks:      installed
 Checkpoints: branch exists
@@ -240,6 +250,48 @@ All checks passed!
 [OK]   partio binary found (you're running it!)
 
 4 issue(s) found. Run 'partio enable' to fix.
+```
+
+---
+
+## `partio prune`
+
+Delete checkpoints older than a retention window from the `partio/checkpoints/v1` branch.
+
+```bash
+partio prune [--older-than 90d] [--dry-run]
+```
+
+| Flag | Type | Default | Description |
+|------|------|---------|-------------|
+| `--older-than` | string | `"90d"` | Retention window; removes checkpoints older than this (e.g. `30d`, `90d`, `365d`) |
+| `--dry-run` | bool | `false` | Preview what would be deleted without making any changes |
+
+The checkpoint linked to the current `HEAD` is never removed. partio rebuilds the orphan branch's tree with git plumbing to drop the pruned entries.
+
+**Dry-run output:**
+
+```
+Dry run — no changes made.
+
+  Would remove a3f8c2d14e9b (branch=feature/auth, created=2026-01-04T09:15:22Z)
+  Would remove bb12340092ac (branch=main, created=2026-01-02T14:30:00Z)
+
+2 checkpoint(s) would be removed, 5 kept.
+```
+
+**Real run output:**
+
+```
+  Removed a3f8c2d14e9b (branch=feature/auth, created=2026-01-04T09:15:22Z)
+
+1 checkpoint(s) removed, 6 kept.
+```
+
+If nothing qualifies:
+
+```
+No checkpoints to prune.
 ```
 
 ---
