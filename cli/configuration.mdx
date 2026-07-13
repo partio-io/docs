@@ -18,6 +18,7 @@ description: "Configure partio behavior with settings files and environment vari
 | `redact.enabled` | bool | `true` | Redact secrets from checkpoint data before it is stored |
 | `redact.entropy_threshold` | float | `4.5` | Shannon entropy (bits/char) above which a token is redacted |
 | `redact.entropy_min_length` | int | `20` | Minimum token length considered for entropy scanning |
+| `stale_session_threshold` | string | `"10m0s"` | How long an ACTIVE/IDLE session file can go without being updated before it is considered stale and cleaned up (e.g. `"10m"`, `"30m"`) |
 
 ## Default settings.json
 
@@ -37,7 +38,8 @@ Created by `partio enable`:
     "enabled": true,
     "entropy_threshold": 4.5,
     "entropy_min_length": 20
-  }
+  },
+  "stale_session_threshold": "10m0s"
 }
 ```
 
@@ -64,6 +66,7 @@ Only fields actually present in a config file override the accumulated config. U
 | `PARTIO_LOG_LEVEL` | `log_level` | `debug`, `info`, `warn`, `error` |
 | `PARTIO_AGENT` | `agent` | Agent name (e.g., `claude-code`, `codex`) |
 | `PARTIO_COMMIT_LINKING` | `commit_linking` | `ask`, `always`, `never` |
+| `PARTIO_STALE_SESSION_THRESHOLD` | `stale_session_threshold` | Duration string (e.g., `"10m"`, `"30m"`) |
 
 ## Choosing the agent
 
