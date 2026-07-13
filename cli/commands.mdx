@@ -100,7 +100,7 @@ partio disabled.
 
 ## `partio status`
 
-Show partio status for the current repository.
+Show partio status for the current repository. Also runs automatic stale session cleanup before displaying results.
 
 ```bash
 partio status
@@ -330,6 +330,35 @@ Scans the checkpoint branch for data that no longer corresponds to any commit.
 Checkpoint data present on partio/checkpoints/v1 branch.
 To fully reset, run: partio reset
 ```
+
+---
+
+## `partio cleanup`
+
+Manually clean up stale session files left behind by crashed or improperly terminated agent processes.
+
+```bash
+partio cleanup
+```
+
+A session is considered stale when:
+- It is in `ACTIVE` or `IDLE` state, and
+- Its state file has not been updated within the configured threshold (default: 10 minutes), and
+- If a process ID is recorded, the agent process is no longer alive.
+
+**Output (stale session found):**
+
+```
+Cleaned up stale session: <session-id> (agent=claude-code)
+```
+
+**Output (no stale sessions):**
+
+```
+No stale sessions found.
+```
+
+<Note>`partio status` also runs stale cleanup automatically before displaying results, so manual invocation is usually not necessary. Not to be confused with `partio clean`, which removes orphaned checkpoint data.</Note>
 
 ---
 
