@@ -220,9 +220,9 @@ partio doctor
 **Checks performed:**
 
 1. `.partio/` directory exists
-2. `pre-commit` hook installed and managed by partio
-3. `post-commit` hook installed and managed by partio
-4. `pre-push` hook installed and managed by partio
+2. `pre-commit` hook installed, readable, and managed by partio
+3. `post-commit` hook installed, readable, and managed by partio
+4. `pre-push` hook installed, readable, and managed by partio
 5. `partio/checkpoints/v1` branch exists
 6. partio binary found in PATH
 
@@ -246,10 +246,11 @@ All checks passed!
 [WARN] pre-commit hook missing
 [OK]   post-commit hook installed
 [WARN] post-commit hook exists but not managed by partio
+[WARN] post-commit hook unreadable: permission denied
 [WARN] checkpoint branch missing
 [OK]   partio binary found (you're running it!)
 
-4 issue(s) found. Run 'partio enable' to fix.
+5 issue(s) found. Run 'partio enable' to fix.
 ```
 
 ---
