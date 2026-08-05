@@ -134,7 +134,7 @@ Status:     not enabled (run 'partio enable' to set up)
 List or restore checkpoints.
 
 ```bash
-partio rewind --list
+partio rewind --list [--branch <name>]
 partio rewind --to <checkpoint-id>
 ```
 
@@ -142,6 +142,7 @@ partio rewind --to <checkpoint-id>
 |------|------|---------|-------------|
 | `--list` | bool | `false` | List all stored checkpoints |
 | `--to` | string | `""` | Restore to a specific checkpoint ID (12 hex characters) |
+| `--branch` | string | `""` | Filter checkpoints by branch name (useful for squash-merged branches) |
 
 **`--list` output:**
 
@@ -151,6 +152,22 @@ Checkpoints:
   a3f8c2d14e9b  branch=main           agent=87%   created=2026-02-17T14:30:00Z
   bb12340092ac  branch=feature/auth    agent=100%  created=2026-02-16T09:15:22Z
 ```
+
+**`--list --branch` output:**
+
+Filters the list to checkpoints whose branch name exactly matches the given value:
+
+```bash
+partio rewind --list --branch feature/auth
+```
+
+```
+Checkpoints:
+
+  bb12340092ac  branch=feature/auth    agent=100%  created=2026-02-16T09:15:22Z
+```
+
+This is the recommended way to find sessions for a branch that was squash-merged into main.
 
 **`--to` output:**
 
@@ -165,6 +182,12 @@ Rewinding to checkpoint a3f8c2d14e9b
 
 This creates a new branch named `partio/rewind/<id>` checked out at the checkpoint's commit.
 
+If the original commit is no longer reachable (e.g. the branch was squash-merged and the original commits were garbage-collected), partio emits a warning and exits without creating a rewind branch — the session context is still shown:
+
+```
+Warning: original commit a3f8c2d is no longer reachable (likely squash-merged or gc'd); session context is still available but branch checkout is skipped.
+```
+
 ---
 
 ## `partio resume`
@@ -173,6 +196,7 @@ Resume a session from a checkpoint. Reads checkpoint data from the orphan branch
 
 ```bash
 partio resume <checkpoint-id>
+partio resume --branch-name <branch>
 ```
 
 | Flag | Type | Default | Description |
@@ -180,10 +204,21 @@ partio resume <checkpoint-id>
 | `--print` | bool | `false` | Print the composed context prompt to stdout |
 | `--copy` | bool | `false` | Copy the context prompt to clipboard |
 | `--branch` | bool | `false` | Create a branch at the checkpoint's commit before launching |
+| `--branch-name` | string | `""` | Resume the most recent session from the named branch (recommended for squash-merged work) |
 
 **Default behavior:**
 
 Writes a context file to a temporary directory and launches Claude Code with instructions to read it and continue the previous work. If Claude Code is not found in PATH, the context is printed to stdout instead.
+
+**With `--branch-name`:**
+
+Finds all checkpoints for the named branch, selects the most recent one by creation time, and resumes it. This is the recommended approach for sessions whose branch was squash-merged into main:
+
+```bash
+partio resume --branch-name feature/my-branch
+```
+
+Either a positional `<checkpoint-id>` or `--branch-name` is required; invoking `resume` with neither exits non-zero with a usage error.
 
 **With `--branch`:**
 
