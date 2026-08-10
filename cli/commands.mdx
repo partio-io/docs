@@ -398,6 +398,38 @@ No stale sessions found.
 
 ---
 
+## `partio explain`
+
+Show details of a checkpoint including the AI model used.
+
+```bash
+partio explain <checkpoint-id>
+```
+
+Reads checkpoint metadata from the `partio/checkpoints/v1` orphan branch and prints a summary to stdout. The model field shows which AI model produced the session (e.g. `claude-sonnet-4-6`). If the checkpoint was captured before model tracking was added, `Model` displays as `unknown`.
+
+**Output:**
+
+```
+Checkpoint: a3f8c2d14e9b
+  Commit:     4f9a2c...
+  Branch:     main
+  Created:    2026-02-17T14:30:00Z
+  Agent:      claude-code
+  Model:      claude-sonnet-4-6
+  Attribution: 87% agent
+  Session:    <session-id>
+  Plan:       <plan-slug>
+
+Prompt:
+<original user request>
+
+Context:
+<session context summary>
+```
+
+---
+
 ## `partio version`
 
 Print the partio version.
