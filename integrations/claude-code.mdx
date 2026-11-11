@@ -72,6 +72,27 @@ Partio-Checkpoint: a3f8c2d14e9b
 Partio-Attribution: 87% agent
 ```
 
+## WSL (Windows Subsystem for Linux)
+
+partio supports using Claude Code on Windows while running Git inside WSL. When Claude Code is installed as a Windows-native application, its processes are invisible to the Linux process namespace and its session files live under `%USERPROFILE%\.claude\projects\` in the Windows filesystem — not under the Linux home directory.
+
+partio handles this automatically:
+
+- **Process detection**: supplements `pgrep` with `tasklist.exe` to detect Windows-native Claude Code processes.
+- **Session discovery**: searches `%USERPROFILE%\.claude\projects\` (translated to a WSL Linux mount path) in addition to `~/.claude/projects/` when looking for session files.
+
+No configuration is required. WSL is detected automatically via environment variables (`WSL_DISTRO_NAME`, `WSL_INTEROP`, `WSLENV`) or `/proc/version`.
+
+### PARTIO_WSL_WIN_HOME
+
+If automatic Windows home directory resolution fails, you can override it:
+
+```bash
+export PARTIO_WSL_WIN_HOME=/mnt/c/Users/yourname
+```
+
+Set this to the WSL mount path of your Windows user profile directory. When set to a Linux path (starting with `/`), it is used directly; otherwise it is converted with `wslpath -u`.
+
 ## Troubleshooting
 
 ### Checkpoints not being created
@@ -87,6 +108,7 @@ Claude Code stores session files in your home directory. If partio can't find th
 
 - Ensure Claude Code has been used in the current repository at least once
 - Check that the session file hasn't been cleaned up before the commit
+- **On WSL**: if Claude Code is installed on Windows, set `PARTIO_WSL_WIN_HOME` to the WSL mount path of your Windows user profile (e.g., `/mnt/c/Users/yourname`) if automatic detection fails
 
 ### Attribution shows 100% unexpectedly
 
