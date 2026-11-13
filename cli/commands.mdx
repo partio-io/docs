@@ -18,12 +18,13 @@ description: "Complete reference for all partio CLI commands"
 Enable partio in the current Git repository.
 
 ```bash
-partio enable [--absolute-path]
+partio enable [--absolute-path] [--stealth]
 ```
 
 | Flag | Type | Default | Description |
 |------|------|---------|-------------|
 | `--absolute-path` | bool | `false` | Install hooks using the absolute path to the partio binary |
+| `--stealth` | bool | `false` | Capture checkpoints locally only: never push the checkpoint branch, add no commit trailers, and leave no changes in the repository. See [Stealth mode](#stealth-mode) |
 
 **What it does:**
 
@@ -67,6 +68,50 @@ Warning: Husky detected.
   and in .husky/post-commit add:
     partio _hook post-commit
 ```
+
+### Stealth mode
+
+`partio enable --stealth` captures sessions without leaving anything your teammates can see:
+
+```bash
+partio enable --stealth
+```
+
+- **No repository changes.** It does not create or modify `.partio/settings.json` and does not touch `.gitignore`. Instead it adds a `.partio/` line to git's untracked, per-clone `info/exclude` file (the path reported by `git rev-parse --git-path info/exclude`). That file lives in the shared git directory, so one entry covers every linked worktree.
+- **No push.** It sets `strategy_options.push_sessions` to `false`, so `partio/checkpoints/v1` is never pushed to `origin`.
+- **No trailers.** It sets `strategy_options.disable_trailers` to `true`, so commits are not amended with `Partio-Checkpoint` or `Partio-Attribution` trailers. Commit hashes and messages stay exactly as you made them.
+
+Hooks and the checkpoint branch are installed as usual, and checkpoints are still written to the local `partio/checkpoints/v1` branch. Because commits carry no trailers, checkpoint IDs don't appear in `git log` — find them with [`partio rewind --list`](#partio-rewind) and inspect one with `partio explain <id>`.
+
+<Warning>Stealth settings are written **only** to the global config, `~/.config/partio/settings.json` (other keys in that file are preserved). Because that file is machine-wide, stealth applies to **every repository** that doesn't override these keys in its own `.partio/settings.json` or `.partio/settings.local.json`.</Warning>
+
+Re-running `partio enable --stealth` changes nothing. If `~/.config/partio/settings.json` contains malformed JSON, the command fails before changing anything and leaves the file untouched. If the `info/exclude` file can't be written, partio logs a warning and continues.
+
+**Output (stealth):**
+
+```
+partio enabled successfully!
+  - Ensured .partio/ config directory exists
+  - Installed git hooks (pre-commit, post-commit, pre-push)
+  - Ready to capture AI sessions on commit
+
+Stealth mode active: checkpoints stay local; the checkpoint branch is not pushed and commits get no trailers.
+  - Wrote push_sessions=false and disable_trailers=true to /home/you/.config/partio/settings.json
+    This applies to every repository without an override; undo it by editing that file.
+  - Hid .partio/ via git's info/exclude; no repository files were changed
+  - List checkpoints with `partio rewind --list` and inspect one with `partio explain <id>`
+```
+
+**Repository overrides:** repository settings outrank the global config, so a repository whose `.partio/settings.json` or `.partio/settings.local.json` sets `strategy_options.push_sessions: true` or `strategy_options.disable_trailers: false` is not in stealth mode. After writing the global file, `partio enable --stealth` reloads the effective config and warns, naming the file and key:
+
+```
+Warning: .partio/settings.json sets strategy_options.push_sessions=true; stealth is not in effect in this repo.
+  Repository settings outrank the global config. partio does not change them; edit them yourself if you want stealth here.
+```
+
+The command still exits successfully and never edits repository settings to force stealth.
+
+**Leaving stealth mode:** there is no `--no-stealth` flag. Edit `~/.config/partio/settings.json` and remove or change `push_sessions` and `disable_trailers` under `strategy_options`. If the checkpoint branch was pushed to `origin` before you turned stealth on, it stays on the remote until you delete it by hand.
 
 ---
 
@@ -115,6 +160,22 @@ Status:     enabled
 Strategy:   manual-commit
 Linking:    ask
 Agent:      claude-code
+Hooks:      installed
+Checkpoints: branch exists
+```
+
+**Output (stealth mode):**
+
+When the effective config has `strategy_options.push_sessions: false` and `strategy_options.disable_trailers: true` (for example after [`partio enable --stealth`](#stealth-mode)), status adds a `Mode:` line:
+
+```
+Repository: /path/to/your-project
+Branch:     main
+Status:     enabled
+Strategy:   manual-commit
+Linking:    ask
+Agent:      claude-code
+Mode:       stealth (checkpoints local only; not pushed, no commit trailers)
 Hooks:      installed
 Checkpoints: branch exists
 ```

@@ -15,6 +15,7 @@ description: "Configure partio behavior with settings files and environment vari
 | `commit_linking` | string | `"ask"` | When to link commits to an active session: `ask`, `always`, or `never` |
 | `log_level` | string | `"info"` | Log verbosity: `debug`, `info`, `warn`, `error` |
 | `strategy_options.push_sessions` | bool | `true` | Push checkpoint branch on `git push` |
+| `strategy_options.disable_trailers` | bool | `false` | Skip adding `Partio-Checkpoint` and `Partio-Attribution` trailers to commits. The commit is not amended, so its hash and message stay as you made them; checkpoints are still written locally |
 | `redact.enabled` | bool | `true` | Redact secrets from checkpoint data before it is stored |
 | `redact.entropy_threshold` | float | `4.5` | Shannon entropy (bits/char) above which a token is redacted |
 | `redact.entropy_min_length` | int | `20` | Minimum token length considered for entropy scanning |
@@ -139,6 +140,30 @@ If you don't want checkpoint data to be pushed automatically:
   }
 }
 ```
+
+### Skip commit trailers
+
+To keep commits exactly as you made them (no `git commit --amend`, no `Partio-*` trailers), set `disable_trailers`:
+
+```json title=".partio/settings.local.json"
+{
+  "strategy_options": {
+    "disable_trailers": true
+  }
+}
+```
+
+Checkpoints are still written to the local `partio/checkpoints/v1` branch against the unchanged commit hash. Since checkpoint IDs no longer appear in commit messages, find them with `partio rewind --list` and inspect one with `partio explain <id>`.
+
+### Stealth mode
+
+When the effective config has both `strategy_options.push_sessions: false` and `strategy_options.disable_trailers: true`, partio is in **stealth mode**: checkpoints stay local, nothing is pushed, and commits carry no trailers. `partio status` shows it:
+
+```
+Mode:       stealth (checkpoints local only; not pushed, no commit trailers)
+```
+
+Stealth is derived from these two options — there is no separate key. Run [`partio enable --stealth`](/cli/commands#stealth-mode) to write both to `~/.config/partio/settings.json`, which applies them to every repository on the machine that doesn't override them in its own `.partio/settings.json` or `.partio/settings.local.json`. There are no environment variables for these options.
 
 ### Enable debug logging for a single command
 

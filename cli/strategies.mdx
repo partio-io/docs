@@ -24,7 +24,7 @@ Captures a checkpoint every time you run `git commit` while an AI agent is detec
    - Reads the saved pre-commit state
    - If an agent was active, captures the session data
    - Writes the checkpoint to the orphan branch
-   - Amends the commit with attribution trailers
+   - Amends the commit with attribution trailers (skipped when `disable_trailers` is `true`)
 
 3. **Pre-push hook** runs before `git push`:
    - Pushes `partio/checkpoints/v1` to the remote
@@ -50,6 +50,7 @@ Captures a checkpoint every time you run `git commit` while an AI agent is detec
 | Option | Default | Description |
 |--------|---------|-------------|
 | `push_sessions` | `true` | Automatically push checkpoint branch on `git push` |
+| `disable_trailers` | `false` | Don't amend commits with `Partio-Checkpoint` / `Partio-Attribution` trailers; the checkpoint records the unchanged commit hash |
 
 ### Non-blocking behavior
 
