@@ -84,6 +84,8 @@ Partio-Attribution: 87% agent
 
 These are standard [Git trailers](https://git-scm.com/docs/git-interpret-trailers) and can be parsed by any tool that reads commit messages.
 
+To leave commits untouched, set `strategy_options.disable_trailers` to `true` (or use [`partio enable --stealth`](/cli/commands#stealth-mode), which also stops the checkpoint branch from being pushed). The commit is then not amended, and the checkpoint is recorded against the original commit hash; use `partio rewind --list` to find checkpoint IDs.
+
 ## Strategies
 
 A **strategy** defines when and how partio captures checkpoints. Currently, one strategy is available:
