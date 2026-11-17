@@ -244,6 +244,75 @@ Copies the context prompt to the system clipboard (macOS and Linux).
 
 ---
 
+## `partio explain`
+
+Show the details of a checkpoint: its metadata, the functions, types and classes its diff changed, and the original prompt and context.
+
+```bash
+partio explain <checkpoint-id>
+```
+
+**Output:**
+
+```
+Checkpoint: a3f8c2d14e9b
+  Commit:     4f9a2c...
+  Branch:     main
+  Created:    2026-02-17 14:30:00 +0000 UTC
+  Agent:      claude-code
+  Model:      claude-opus-5-5
+  Attribution: 87% agent
+  Session:    <session-id>
+  Plan:       my-plan
+
+Changed entities:
+  internal/checkpoint/read.go
+    added              func showOptional(path string) string
+    signature changed  func Read(id string) (*CheckpointData, error)
+    renamed            func oldName → newName
+    removed            type Legacy
+
+Prompt:
+<original prompt>
+
+Context:
+<session context summary>
+```
+
+`Model` shows `unknown` if the model was not recorded. `Session` and `Plan` appear only when set, and `Prompt` and `Context` appear only when the checkpoint stored them.
+
+**Changed entities:**
+
+This section lists the declarations that the checkpoint's stored `diff.patch` added, removed, renamed, or re-signed. Changes are grouped by file in diff order, and entities appear in source order. If a file was renamed, it is shown as `old → new`.
+
+| Change | Meaning |
+|--------|---------|
+| `added` | The declaration exists only after the change |
+| `removed` | The declaration exists only before the change |
+| `signature changed` | The declaration exists on both sides with a different header (parameters, return type, modifiers, and so on) |
+| `renamed` | A declaration of the same kind was removed and another added whose signature is identical apart from the name. It is shown as `<kind> old → new` |
+
+Supported languages:
+
+| Language | Extensions | Entities |
+|----------|------------|----------|
+| Go | `.go` (including `_test.go`) | Top-level functions, methods (shown as `(*T).Name` or `T.Name`), and `type` declarations, including grouped `type (...)` blocks |
+| TypeScript / JavaScript | `.ts`, `.tsx`, `.mts`, `.cts`, `.js`, `.jsx`, `.mjs`, `.cjs`, and `.d.ts` / `.d.mts` / `.d.cts` | `function`, `class`, `interface`, `type X =`, `enum`, and `const`/`let`/`var` bound to an arrow function or function expression |
+
+Notes:
+
+- The section is built only from the stored diff and makes no extra git calls, so it still works if the checkpoint's commit is no longer in your clone (for example, after a rebase or squash-merge).
+- Edits that only touch a body, and changes that only reflow whitespace, are not reported.
+- Go `const`/`var` declarations, class methods, and object-literal members are not reported.
+- A rename is reported only when there is exactly one match. If the match is ambiguous, or the kind or signature also changed, the old name is listed as `removed` and the new name as `added`.
+- If a declaration's header is cut off at a hunk boundary, it is left out rather than guessed.
+- Files in other languages, minified `*.min.js` files, and files with a diff line longer than 1000 bytes are skipped.
+- Signatures longer than 100 characters are cut off and end with `…`.
+- Signatures come from the redacted diff, so they may contain a redaction placeholder where a secret-like value was.
+- If no supported file has a change at the entity level, the section, including its header, is not shown.
+
+---
+
 ## `partio doctor`
 
 Check partio installation health.
